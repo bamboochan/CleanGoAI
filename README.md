@@ -1,6 +1,8 @@
-This is a Go AI
+This is a Go AI.
 ====
 Using two convolutional neural networks and a tree search, this program is able to play go at a considerably advanced level.
+
+Requirements: Numpy and Tensorflow need to be installed. Tested with tensorflow 1.2.0, numpy 1.13.0 and python 3.6.1. 
 
 You can play Go against the network by running `python3 play.py`. You will be playing against version using one convolutional neural network to evaluate the best move for every position.
 
