@@ -4,6 +4,9 @@ import opening as op
 import boardchange_km as bc
 import itertools
 import sys
+import os
+
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 def weight(shape):
     initial = tf.truncated_normal(shape, stddev=0.01)
