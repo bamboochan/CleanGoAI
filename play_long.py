@@ -133,7 +133,7 @@ with g2.as_default():
 with g1.as_default():
     saver1.restore(sess1, 'big_policy_network5.ckpt')
 with g2.as_default():
-		saver2.restore(sess2, 'saved_value_network_final.ckpt')
+    saver2.restore(sess2, 'saved_value_network_final.ckpt')
 
 ## END NEURAL NET CODE
 ## BEGIN GAMEPLAY CODE
@@ -142,8 +142,9 @@ num_moves_considered = 5
 depth_to_consider = 3
 
 class GameTree(object):
-    def __init__(self, name=None, children=None):
+    def __init__(self, name=None, last_move=None, children=None):
         self.name = name
+        self.last_move = last_move
         self.children = []
         if children is not None:
             for child in children:
@@ -203,6 +204,7 @@ def growTree(root, width, depth):
     if isinstance(root.name, (np.ndarray, np.generic)):
         if depth == 0:
             root.name = sess2.run(res_v, feed_dict={pre_x_v: root.name, keep_prob_v: 1.0})[0][0]
+            root.last_move = None
             root.children = None
             return root
 #        if root.children is not None:
@@ -213,12 +215,13 @@ def growTree(root, width, depth):
         p_indices = [(i, j) for i, j in itertools.product(*[range(19), range(19)]) if not np.any(root.name[i][j])]
         p_indices.sort(key=lambda x: p_predicts[x[0]][x[1]], reverse=True)
 #        print(p_indices)
-        root.children = [growTree(GameTree(name=do_move(name_cp, [i,j], True)), width, depth-1) for i,j in p_indices[:10]]
+        root.children = [growTree(GameTree(name=do_move(name_cp, [i,j], True), last_move=[i,j]), width, depth-1) for i,j in p_indices[:10]]
     return root
 
 def playMove():
     global gamestate
     global depth_to_consider
+    global move
     fuseki_match, fuseki_move = op.make_move(gamestate)
     if fuseki_match:
         print('Found a cool fuseki move!')
@@ -229,6 +232,18 @@ def playMove():
     print('I\'ve made a game tree!')
     direction = tMiniMax(gametree)
     gamestate = gametree.children[direction].name
+    move = gametree.children[direction].last_move
+
+
+def printDistribution(dist):
+    result = "   a b c d e f g h j k l m n o p q r s t\n"
+    for i in range(19):
+        result += str(19 - i).zfill(2) + ' '
+        for j in range(19):
+            result += ('%3.0f' % (dist[i][j] * 1000)) + ' '
+        result += '\n'
+    print(result)
+
 
 def playBestMove():
     global gamestate
@@ -242,6 +257,7 @@ def playBestMove():
         return
     print('Thinking hard about this one...')
     p_predicts = sess1.run(res, feed_dict={pre_x: np.copy(gamestate), keep_prob: 1.0})[0]
+    printDistribution(p_predicts)
     p_indices = [[i, j] for i, j in itertools.product(*[range(19), range(19)]) if not np.any(gamestate[i][j])]
     p_indices.sort(key=lambda x: p_predicts[x[0]][x[1]], reverse=True)
     i = 0
@@ -289,8 +305,8 @@ if color == 'black':
 
 while not gameDone:
 #    print(showBoard())
-#    playMove()
     playMove()
+#    playBestMove()
     game_log.append(np.copy(gamestate))
     print(showBoard())
     player_entered_move = False
