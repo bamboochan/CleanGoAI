@@ -131,9 +131,9 @@ with g2.as_default():
     saver2 = tf.train.Saver()
 
 with g1.as_default():
-    saver1.restore(sess1, 'big_policy_network4.ckpt')
-with g2.as_default():
-    saver2.restore(sess2, 'saved_value_network_final.ckpt')
+    saver1.restore(sess1, 'big_policy_network5.ckpt')
+    #with g2.as_default():
+# saver2.restore(sess2, 'saved_value_network_final.ckpt')
 
 ## END NEURAL NET CODE
 ## BEGIN GAMEPLAY CODE
